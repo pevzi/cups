@@ -67,16 +67,12 @@ end
 local Field = class("Field")
 
 function Field:initialize(columns, rows, balls)
-    columns = columns or 3
-    rows = rows or 1
-    balls = balls or 1
+    self.columns = columns or 3
+    self.rows = rows or 1
+    self.balls = balls or 1
 
-    self.columns = columns
-    self.rows = rows
-    self.balls = balls
-
-    self.data = initData(columns, rows)
-    self.balls = initBalls(balls, columns * rows)
+    self.data = initData(self.columns, self.rows)
+    self.haveBalls = initBalls(self.balls, self.columns * self.rows)
 end
 
 function Field:swap(n)
@@ -120,7 +116,7 @@ end
 
 function Field:hasBall(c, r)
     local id = self.data[r][c]
-    return self.balls[id] or false, id
+    return self.haveBalls[id] or false, id
 end
 
 return Field

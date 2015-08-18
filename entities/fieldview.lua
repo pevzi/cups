@@ -4,6 +4,25 @@ local Cup = require "entities.cup"
 
 local class = require "libs.middleclass"
 
+local function fitRect(width, height, l,t,w,h)
+    local wratio = w / width
+    local hratio = h / height
+
+    local x, y, scale
+
+    if wratio > hratio then
+        x = l + (w - hratio * width) / 2
+        y = t
+        scale = hratio
+    else
+        x = l
+        y = t + (h - wratio * height) / 2
+        scale = wratio
+    end
+
+    return x, y, scale
+end
+
 local FieldView = class("FieldView")
 
 function FieldView:initialize(field, l,t,w,h)
@@ -31,18 +50,7 @@ function FieldView:initialize(field, l,t,w,h)
     local width = xStep * (field.columns - 1) + cupWidth
     local height = yStep * (field.rows - 1) + cupHeight
 
-    local wratio = w / width
-    local hratio = h / height
-
-    if wratio > hratio then
-        self.scale = hratio
-        self.x = l + (w - hratio * width) / 2
-        self.y = t
-    else
-        self.scale = wratio
-        self.x = l
-        self.y = t + (h - wratio * height) / 2
-    end
+    self.x, self.y, self.scale = fitRect(width, height, l,t,w,h)
 end
 
 function FieldView:startSwap(cup1id, cup2id, duration)
