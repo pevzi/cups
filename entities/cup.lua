@@ -10,4 +10,8 @@ function Cup:initialize(x, y, batch)
     self.id = self.batch:add(self.x, self.y)
 end
 
+function Cup:updatePosition()
+    self.batch:set(self.id, self.x, self.y)
+end
+
 return Cup
