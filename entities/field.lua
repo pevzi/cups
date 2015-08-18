@@ -97,7 +97,7 @@ function Field:swap(n)
 
         repeat
             if trials >= maxTrials then
-                return
+                return swappedPairs
             end
 
             c1, r1, c2, r2 = choosePair(self.columns, self.rows)
