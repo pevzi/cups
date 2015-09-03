@@ -5,6 +5,9 @@ local Cup = require "entities.cup"
 local class = require "libs.middleclass"
 local tween = require "libs.tween"
 
+local ANGLE = math.pi * 0.8
+local EASING = "inOutQuad"
+
 local function fitRect(width, height, l,t,w,h)
     local wratio = w / width
     local hratio = h / height
@@ -22,6 +25,33 @@ local function fitRect(width, height, l,t,w,h)
     end
 
     return x, y, scale
+end
+
+local function makeArcMover(x1, y1, x2, y2, subject, angle)
+    angle = angle or math.pi
+
+    local dist = math.sqrt((x1 - x2) ^ 2 + (y1 - y2) ^ 2)
+    local radius = dist / 2 / math.sin(angle / 2)
+    local offset = math.cos(angle / 2) * radius
+
+    local mx = (x1 + x2) / 2
+    local my = (y1 + y2) / 2
+
+    local cx = -(y2 - y1) / 2 / (dist / 2) * offset + mx
+    local cy =  (x2 - x1) / 2 / (dist / 2) * offset + my
+
+    local startAngle = math.atan2(y1 - y2, x1 - x2) - (angle / 2) + (math.pi / 2)
+
+    return {
+        p = 0,
+
+        updatePosition = function (self)
+            local currentAngle = startAngle + self.p * angle
+            subject.x = math.cos(currentAngle) * radius + cx
+            subject.y = math.sin(currentAngle) * radius + cy
+            subject:updatePosition()
+        end
+    }
 end
 
 local FieldView = class("FieldView")
@@ -55,8 +85,11 @@ function FieldView:startSwap(id1, id2, duration)
     local cup1 = self.cups[id1]
     local cup2 = self.cups[id2]
 
-    local t1 = tween.new(duration, cup1, {x = cup2.x, y = cup2.y}, "inOutQuad")
-    local t2 = tween.new(duration, cup2, {x = cup1.x, y = cup1.y}, "inOutQuad")
+    local mover1 = makeArcMover(cup1.x, cup1.y, cup2.x, cup2.y, cup1, ANGLE)
+    local mover2 = makeArcMover(cup2.x, cup2.y, cup1.x, cup1.y, cup2, ANGLE)
+
+    local t1 = tween.new(duration, mover1, {p = 1}, EASING)
+    local t2 = tween.new(duration, mover2, {p = 1}, EASING)
 
     self.tweens[t1] = true
     self.tweens[t2] = true
