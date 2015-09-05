@@ -1,20 +1,20 @@
 local class = require "libs.middleclass"
 
-local function initData(columns, rows)
-    local data = {}
+local function initCups(columns, rows)
+    local cups = {}
 
-    local i = 1
+    local id = 1
 
     for r = 1, rows do
-        data[r] = {}
+        cups[r] = {}
 
         for c = 1, columns do
-            data[r][c] = i
-            i = i + 1
+            cups[r][c] = id
+            id = id + 1
         end
     end
 
-    return data
+    return cups
 end
 
 local function initBalls(balls, cups)
@@ -66,13 +66,14 @@ end
 
 local Field = class("Field")
 
-function Field:initialize(columns, rows, balls)
+function Field:initialize(columns, rows, nballs)
     self.columns = columns or 3
     self.rows = rows or 1
-    self.balls = balls or 1
 
-    self.data = initData(self.columns, self.rows)
-    self.haveBalls = initBalls(self.balls, self.columns * self.rows)
+    nballs = nballs or 1
+
+    self.cups = initCups(self.columns, self.rows)
+    self.balls = initBalls(nballs, self.columns * self.rows)
 end
 
 function Field:swap(n)
@@ -97,7 +98,7 @@ function Field:swap(n)
             end
 
             c1, r1, c2, r2 = choosePair(self.columns, self.rows)
-            id1, id2 = self.data[r1][c1], self.data[r2][c2]
+            id1, id2 = self.cups[r1][c1], self.cups[r2][c2]
 
             trials = trials + 1
 
@@ -106,7 +107,7 @@ function Field:swap(n)
         swapped[id1] = true
         swapped[id2] = true
 
-        self.data[r1][c1], self.data[r2][c2] = id2, id1
+        self.cups[r1][c1], self.cups[r2][c2] = id2, id1
 
         table.insert(swappedPairs, {id1, id2})
     end
@@ -114,9 +115,9 @@ function Field:swap(n)
     return swappedPairs
 end
 
-function Field:hasBall(c, r)
-    local id = self.data[r][c]
-    return self.haveBalls[id] or false, id
+function Field:getBall(c, r)
+    local id = r and self.cups[r][c] or c
+    return self.balls[id], id
 end
 
 return Field

@@ -1,4 +1,4 @@
-local r = require "resources"
+local res = require "resources"
 
 local Cup = require "entities.cup"
 
@@ -57,12 +57,12 @@ end
 local FieldView = class("FieldView")
 
 function FieldView:initialize(field, l,t,w,h)
-    self.batch = love.graphics.newSpriteBatch(r.images.cup, field.columns * field.rows)
+    self.batch = love.graphics.newSpriteBatch(res.images.cup, field.columns * field.rows)
 
     self.cups = {}
 
-    local cupWidth = r.images.cup:getWidth()
-    local cupHeight = r.images.cup:getHeight()
+    local cupWidth = res.images.cup:getWidth()
+    local cupHeight = res.images.cup:getHeight()
 
     local xStep = cupWidth * 1.3
     local yStep = cupHeight * 1.3
@@ -81,7 +81,7 @@ function FieldView:initialize(field, l,t,w,h)
     self.tweens = {}
 end
 
-function FieldView:startSwap(id1, id2, duration)
+function FieldView:swap(id1, id2, duration)
     local cup1 = self.cups[id1]
     local cup2 = self.cups[id2]
 
