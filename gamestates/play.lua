@@ -10,9 +10,7 @@ local function makeSwapper(field, fieldView, duration, delay, simultaneous)
 
         local swappedPairs = field:swap(simultaneous)
 
-        for _, pair in ipairs(swappedPairs) do
-            fieldView:swap(pair[1], pair[2], duration)
-        end
+        fieldView:swap(swappedPairs, duration)
     end)
 end
 

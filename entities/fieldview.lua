@@ -27,7 +27,7 @@ local function fitRect(width, height, l,t,w,h)
     return x, y, scale
 end
 
-local function makeArcMover(x1, y1, x2, y2, subject, angle)
+local function makeArc(x1, y1, x2, y2, angle)
     angle = angle or math.pi
 
     local dist = math.sqrt((x1 - x2) ^ 2 + (y1 - y2) ^ 2)
@@ -42,16 +42,38 @@ local function makeArcMover(x1, y1, x2, y2, subject, angle)
 
     local startAngle = math.atan2(y1 - y2, x1 - x2) - (angle / 2) + (math.pi / 2)
 
-    return {
-        p = 0,
+    return function (p)
+        local currentAngle = startAngle + p * angle
+        local x = math.cos(currentAngle) * radius + cx
+        local y = math.sin(currentAngle) * radius + cy
+        return x, y
+    end
+end
 
-        updatePosition = function (self)
-            local currentAngle = startAngle + self.p * angle
-            subject.x = math.cos(currentAngle) * radius + cx
-            subject.y = math.sin(currentAngle) * radius + cy
-            subject:updatePosition()
-        end
-    }
+local Swapper = class("Swapper")
+
+function Swapper:initialize(angle)
+    self.angle = angle
+    self.funcs = {}
+    self.p = 0
+end
+
+function Swapper:addPair(cup1, cup2)
+    local arc1 = makeArc(cup1.x, cup1.y, cup2.x, cup2.y, self.angle)
+    local arc2 = makeArc(cup2.x, cup2.y, cup1.x, cup1.y, self.angle)
+
+    local func = function (p)
+        cup1:setPosition(arc1(p))
+        cup2:setPosition(arc2(p))
+    end
+
+    table.insert(self.funcs, func)
+end
+
+function Swapper:update()
+    for _, func in ipairs(self.funcs) do
+        func(self.p)
+    end
 end
 
 local FieldView = class("FieldView")
@@ -77,41 +99,40 @@ function FieldView:initialize(field, l,t,w,h)
     local height = yStep * (field.rows - 1) + cupHeight
 
     self.x, self.y, self.scale = fitRect(width, height, l,t,w,h)
-
-    self.tweens = {}
 end
 
-function FieldView:swap(id1, id2, duration)
-    local cup1 = self.cups[id1]
-    local cup2 = self.cups[id2]
+function FieldView:swap(swappedPairs, duration)
+    local swapper = Swapper(ANGLE)
 
-    local mover1 = makeArcMover(cup1.x, cup1.y, cup2.x, cup2.y, cup1, ANGLE)
-    local mover2 = makeArcMover(cup2.x, cup2.y, cup1.x, cup1.y, cup2, ANGLE)
+    for _, pair in ipairs(swappedPairs) do
+        local id1, id2 = pair[1], pair[2]
 
-    local t1 = tween.new(duration, mover1, {p = 1}, EASING)
-    local t2 = tween.new(duration, mover2, {p = 1}, EASING)
+        local cup1 = self.cups[id1]
+        local cup2 = self.cups[id2]
 
-    self.tweens[t1] = true
-    self.tweens[t2] = true
+        swapper:addPair(cup1, cup2)
+    end
+
+    self.swapTween = tween.new(duration, swapper, {p = 1}, EASING)
 end
 
 function FieldView:stopTweens()
-    for t in pairs(self.tweens) do
-        t:set(t.duration)
-        t.subject:updatePosition()
+    if self.swapTween then
+        self.swapTween:set(self.swapTween.duration)
+        self.swapTween.subject:update()
     end
 
-    self.tweens = {}
+    self.swapTween = nil
 end
 
 function FieldView:update(dt)
-    for t in pairs(self.tweens) do
-        local complete = t:update(dt)
+    if self.swapTween then
+        local complete = self.swapTween:update(dt)
 
-        t.subject:updatePosition()
+        self.swapTween.subject:update()
 
         if complete then
-            self.tweens[t] = nil
+            self.swapTween = nil
         end
     end
 end

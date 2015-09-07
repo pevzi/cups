@@ -7,11 +7,14 @@ function Cup:initialize(x, y, batch)
     self.y = y
     self.batch = batch
 
-    self.spriteId = self.batch:add(self.x, self.y)
+    self.spriteId = batch:add(x, y)
 end
 
-function Cup:updatePosition()
-    self.batch:set(self.spriteId, self.x, self.y)
+function Cup:setPosition(x, y)
+    self.x = x
+    self.y = y
+
+    self.batch:set(self.spriteId, x, y)
 end
 
 return Cup
