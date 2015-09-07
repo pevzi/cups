@@ -3,10 +3,10 @@ local res = require "resources"
 local Cup = require "entities.cup"
 
 local class = require "libs.middleclass"
-local tween = require "libs.tween"
+local flux = require "libs.flux"
 
 local ANGLE = math.pi * 0.8
-local EASING = "inOutQuad"
+local EASING = "quadinout"
 
 local function fitRect(width, height, l,t,w,h)
     local wratio = w / width
@@ -99,6 +99,8 @@ function FieldView:initialize(field, l,t,w,h)
     local height = yStep * (field.rows - 1) + cupHeight
 
     self.x, self.y, self.scale = fitRect(width, height, l,t,w,h)
+
+    self.tweens = flux.group()
 end
 
 function FieldView:swap(swappedPairs, duration)
@@ -113,28 +115,19 @@ function FieldView:swap(swappedPairs, duration)
         swapper:addPair(cup1, cup2)
     end
 
-    self.swapTween = tween.new(duration, swapper, {p = 1}, EASING)
+    local tween = self.tweens:to(swapper, duration, {p = 1}):ease(EASING)
+
+    tween:onupdate(function ()
+        swapper:update()
+    end)
 end
 
-function FieldView:stopTweens()
-    if self.swapTween then
-        self.swapTween:set(self.swapTween.duration)
-        self.swapTween.subject:update()
-    end
-
-    self.swapTween = nil
+function FieldView:completeTweens()
+    self.tweens:update(math.huge)
 end
 
 function FieldView:update(dt)
-    if self.swapTween then
-        local complete = self.swapTween:update(dt)
-
-        self.swapTween.subject:update()
-
-        if complete then
-            self.swapTween = nil
-        end
-    end
+    self.tweens:update(dt)
 end
 
 function FieldView:draw()
