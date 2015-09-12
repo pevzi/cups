@@ -1,3 +1,5 @@
+local res = require "resources"
+
 local class = require "libs.middleclass"
 
 local function initCups(columns, rows)
@@ -23,7 +25,7 @@ local function initBalls(balls, cups)
     local result = {}
 
     if balls == 1 then
-        result[math.random(cups)] = true
+        result[math.random(cups)] = next(res.colors)
         return result
     end
 
@@ -33,11 +35,16 @@ local function initBalls(balls, cups)
         numbers[i] = i
     end
 
+    local color
+
     -- essentially a Fisher–Yates shuffle
     for i = 1, balls do
+        color = next(res.colors, color) or next(res.colors)
+
         local j = math.random(i, cups)
         numbers[i], numbers[j] = numbers[j], numbers[i]
-        result[numbers[i]] = true
+
+        result[numbers[i]] = color
     end
 
     return result

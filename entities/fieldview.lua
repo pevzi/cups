@@ -1,6 +1,7 @@
 local res = require "resources"
 
 local Cup = require "entities.cup"
+local Ball = require "entities.ball"
 
 local class = require "libs.middleclass"
 local flux = require "libs.flux"
@@ -79,19 +80,29 @@ end
 local FieldView = class("FieldView")
 
 function FieldView:initialize(field, l,t,w,h)
-    self.batch = love.graphics.newSpriteBatch(res.images.cup, field.columns * field.rows)
+    self.cupsBatch = love.graphics.newSpriteBatch(res.images.cup, field.columns * field.rows)
+    self.ballsBatch = love.graphics.newSpriteBatch(res.images.ball)
 
     self.cups = {}
+    self.balls = {}
 
     local cupWidth = res.images.cup:getWidth()
     local cupHeight = res.images.cup:getHeight()
 
     local xStep = cupWidth * 1.3
-    local yStep = cupHeight * 1.3
+    local yStep = cupHeight * 1.55
 
     for r = 1, field.rows do
         for c = 1, field.columns do
-            table.insert(self.cups, Cup((c - 1) * xStep, (r - 1) * yStep, self.batch))
+            local id = field.cups[r][c]
+            local cup = Cup((c - 1) * xStep, (r - 1) * yStep, self.cupsBatch)
+
+            self.cups[id] = cup
+
+            local ballColor = field:getBall(id)
+            if ballColor then
+                self.balls[cup] = Ball(res.colors[ballColor], self.ballsBatch)
+            end
         end
     end
 
@@ -101,6 +112,8 @@ function FieldView:initialize(field, l,t,w,h)
     self.x, self.y, self.scale = fitRect(width, height, l,t,w,h)
 
     self.tweens = flux.group()
+
+    self.showingBalls = false
 end
 
 function FieldView:swap(swappedPairs, duration)
@@ -122,6 +135,52 @@ function FieldView:swap(swappedPairs, duration)
     end)
 end
 
+function FieldView:showBalls(show, duration)
+    duration = duration or 0.5
+
+    local easing, yoffset
+
+    if show then
+        easing = "backout"
+        yoffset = -res.images.cup:getWidth() / 2
+    else
+        easing = "quadinout"
+        yoffset = 0
+    end
+
+    local maxDelay = -1
+    local lastTween
+
+    for cup, ball in pairs(self.balls) do
+        ball:updateSprite(cup)
+
+        local tween = self.tweens:to(cup, duration, {yoffset = yoffset}):ease(easing)
+
+        tween:onupdate(function ()
+            cup:updateSprite()
+        end)
+
+        local delay = math.random() * duration * 0.4
+
+        tween:delay(delay)
+
+        if delay > maxDelay then
+            maxDelay = delay
+            lastTween = tween
+        end
+    end
+
+    if lastTween then
+        lastTween:oncomplete(function ()
+            self.showingBalls = show
+        end)
+    end
+
+    if show then
+        self.showingBalls = true
+    end
+end
+
 function FieldView:completeTweens()
     self.tweens:update(math.huge)
 end
@@ -136,7 +195,11 @@ function FieldView:draw()
         love.graphics.translate(self.x, self.y)
         love.graphics.scale(self.scale)
 
-        love.graphics.draw(self.batch)
+        if self.showingBalls then
+            love.graphics.draw(self.ballsBatch)
+        end
+
+        love.graphics.draw(self.cupsBatch)
 
     love.graphics.pop()
 end
