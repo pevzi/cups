@@ -6,10 +6,7 @@ local cron = require "libs.cron"
 
 local function makeSwapper(field, fieldView, duration, delay, simultaneous)
     return cron.every(duration + delay, function ()
-        fieldView:completeTweens()
-
         local swappedPairs = field:swap(simultaneous)
-
         fieldView:swap(swappedPairs, duration)
     end)
 end

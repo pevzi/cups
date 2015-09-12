@@ -117,6 +117,14 @@ function FieldView:initialize(field, l,t,w,h)
 end
 
 function FieldView:swap(swappedPairs, duration)
+    if #self.tweens > 0 then
+        self:completeTweens()
+    end
+
+    if self.showingBalls then
+        self:showBalls(false, 0)
+    end
+
     local swapper = Swapper(ANGLE)
 
     for _, pair in ipairs(swappedPairs) do
@@ -136,6 +144,10 @@ function FieldView:swap(swappedPairs, duration)
 end
 
 function FieldView:showBalls(show, duration)
+    if #self.tweens > 0 then
+        self:completeTweens()
+    end
+
     duration = duration or 0.5
 
     local easing, yoffset
@@ -146,6 +158,19 @@ function FieldView:showBalls(show, duration)
     else
         easing = "quadinout"
         yoffset = 0
+    end
+
+    if duration == 0 then
+        for cup, ball in pairs(self.balls) do
+            ball:updateSprite(cup)
+
+            cup.yoffset = yoffset
+            cup:updateSprite()
+
+            self.showingBalls = show
+        end
+
+        return
     end
 
     local maxDelay = -1
@@ -170,14 +195,12 @@ function FieldView:showBalls(show, duration)
         end
     end
 
-    if lastTween then
-        lastTween:oncomplete(function ()
-            self.showingBalls = show
-        end)
-    end
-
     if show then
         self.showingBalls = true
+    elseif lastTween then
+        lastTween:oncomplete(function ()
+            self.showingBalls = false
+        end)
     end
 end
 
