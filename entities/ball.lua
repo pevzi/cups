@@ -11,10 +11,7 @@ function Ball:initialize(color, batch)
     self.color = color
     self.batch = batch
 
-    self.x = 0
-    self.y = 0
-
-    self.spriteId = batch:add(x, y)
+    self.spriteId = batch:add()
 end
 
 function Ball:updateSprite(cup)
