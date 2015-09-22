@@ -1,15 +1,6 @@
-local Cup = require "entities.cup"
 local Field = require "entities.field"
 local FieldView = require "entities.fieldview"
-
-local cron = require "libs.cron"
-
-local function makeSwapper(field, fieldView, duration, delay, simultaneous)
-    return cron.every(duration + delay, function ()
-        local swappedPairs = field:swap(simultaneous)
-        fieldView:swap(swappedPairs, duration)
-    end)
-end
+local Operator = require "entities.operator"
 
 local Play = {}
 
@@ -24,17 +15,14 @@ end
 function Play:newGame(params)
     self.params = params
 
-    self.field = Field(10, 5, 3)
+    self.field = Field(4, 2, 2)
     self.fieldView = FieldView(self.field, 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
 
-    self.swapper = makeSwapper(self.field, self.fieldView, 0.5, 0.5, 5)
+    self.operator = Operator(self.field, self.fieldView, 0.1, 0.4, 8, 2, 1)
 end
 
 function Play:update(dt)
-    if self.swapper then
-        self.swapper:update(dt)
-    end
-
+    self.operator:update(dt)
     self.fieldView:update(dt)
 end
 
