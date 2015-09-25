@@ -117,10 +117,6 @@ function FieldView:initialize(field, l,t,w,h)
 end
 
 function FieldView:swap(swappedPairs, duration)
-    if #self.tweens > 0 then
-        self:completeTweens()
-    end
-
     if self.showingBalls then
         self:showBalls(false, 0)
     end
@@ -146,10 +142,6 @@ function FieldView:swap(swappedPairs, duration)
 end
 
 function FieldView:showBalls(show, duration)
-    if #self.tweens > 0 then
-        self:completeTweens()
-    end
-
     duration = duration or 0.5
 
     local easing, yoffset
@@ -193,10 +185,6 @@ function FieldView:showBalls(show, duration)
     end
 
     return lastTween
-end
-
-function FieldView:completeTweens()
-    self.tweens:update(math.huge)
 end
 
 function FieldView:update(dt)
