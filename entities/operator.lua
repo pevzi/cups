@@ -2,16 +2,6 @@ local class = require "libs.middleclass"
 local Stateful = require "libs.stateful"
 local cron = require "libs.cron"
 
-local function makeContinue()
-    local co = coroutine.running()
-
-    local function continue()
-        coroutine.resume(co)
-    end
-
-    return continue, co
-end
-
 local Show = {}
 
 function Show:enteredState()
@@ -40,6 +30,24 @@ function Shuffle:enteredState()
     end)
 end
 
+local function resume(co)
+    local ok, err = coroutine.resume(co)
+
+    if not ok then
+        error(err)
+    end
+end
+
+local function makeContinue()
+    local co = coroutine.running()
+
+    local function continue()
+        resume(co)
+    end
+
+    return continue, co
+end
+
 local Operator = class("Operator"):include(Stateful)
 
 function Operator:initialize(field, fieldView, swapDelay, swapDuration, rounds, simultaneous, ballDelay)
@@ -58,7 +66,7 @@ end
 
 function Operator:runCoroutine(body)
     local co = coroutine.create(body)
-    coroutine.resume(co)
+    resume(co)
 end
 
 function Operator:sleep(duration)
