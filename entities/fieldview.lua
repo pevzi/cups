@@ -57,29 +57,21 @@ local function makeArc(x1, y1, x2, y2, angle)
     end
 end
 
-local Swapper = class("Swapper")
+local Mover = class("Mover")
 
-function Swapper:initialize(angle)
-    self.angle = angle
-    self.funcs = {}
+function Mover:initialize(angle)
+    self.angle = angle or ANGLE
+    self.arcs = {}
     self.p = 0
 end
 
-function Swapper:addPair(cup1, cup2)
-    local arc1 = makeArc(cup1.x, cup1.y, cup2.x, cup2.y, self.angle)
-    local arc2 = makeArc(cup2.x, cup2.y, cup1.x, cup1.y, self.angle)
-
-    local func = function (p)
-        cup1:setPosition(arc1(p))
-        cup2:setPosition(arc2(p))
-    end
-
-    table.insert(self.funcs, func)
+function Mover:add(cup, x, y)
+    self.arcs[cup] = makeArc(cup.x, cup.y, x, y, self.angle)
 end
 
-function Swapper:update()
-    for _, func in ipairs(self.funcs) do
-        func(self.p)
+function Mover:update()
+    for cup, arc in pairs(self.arcs) do
+        cup:setPosition(arc(self.p))
     end
 end
 
@@ -112,22 +104,22 @@ function FieldView:initialize(field, l,t,w,h)
     self.showingBalls = false
 end
 
-function FieldView:swap(swappedPairs, duration)
-    local swapper = Swapper(ANGLE)
+function FieldView:moveCups(toMove, duration)
+    local mover = Mover()
 
-    for _, pair in ipairs(swappedPairs) do
-        local id1, id2 = pair[1], pair[2]
+    for id, position in pairs(toMove) do
+        local cup = self.cups[id]
 
-        local cup1 = self.cups[id1]
-        local cup2 = self.cups[id2]
+        local c, r = position[1], position[2]
+        local x, y = (c - 1) * xStep, (r - 1) * yStep
 
-        swapper:addPair(cup1, cup2)
+        mover:add(cup, x, y)
     end
 
-    local tween = self.tweens:to(swapper, duration, {p = 1}):ease(EASING)
+    local tween = self.tweens:to(mover, duration, {p = 1}):ease(EASING)
 
     tween:onupdate(function ()
-        swapper:update()
+        mover:update()
     end)
 
     return tween

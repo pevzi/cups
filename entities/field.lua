@@ -90,7 +90,6 @@ function Field:swap(n)
     n = n or 1
 
     local swapped = {}
-    local swappedPairs = {}
 
     for i = 1, n do
         local c1, r1, c2, r2
@@ -101,7 +100,7 @@ function Field:swap(n)
 
         repeat
             if trials >= maxTrials then
-                return swappedPairs
+                return swapped
             end
 
             c1, r1, c2, r2 = choosePair(self.columns, self.rows)
@@ -111,15 +110,13 @@ function Field:swap(n)
 
         until i == 1 or (swapped[id1] == nil and swapped[id2] == nil)
 
-        swapped[id1] = true
-        swapped[id2] = true
-
         self.cups[r1][c1], self.cups[r2][c2] = id2, id1
 
-        table.insert(swappedPairs, {id1, id2})
+        swapped[id1] = {c2, r2}
+        swapped[id2] = {c1, r1}
     end
 
-    return swappedPairs
+    return swapped
 end
 
 function Field:getBall(c, r)

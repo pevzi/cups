@@ -103,8 +103,8 @@ function Operator:closeCup(id)
 end
 
 function Operator:swap()
-    local swappedPairs = self.field:swap(self.simultaneous)
-    self.fieldView:swap(swappedPairs, self.swapDuration):oncomplete(makeContinue())
+    local moved = self.field:swap(self.simultaneous)
+    self.fieldView:moveCups(moved, self.swapDuration):oncomplete(makeContinue())
     coroutine.yield()
 end
 
