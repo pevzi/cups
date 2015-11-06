@@ -83,12 +83,22 @@ function Operator:sleep(duration)
 end
 
 function Operator:showBalls()
-    self.fieldView:showBalls(true):oncomplete(makeContinue())
+    self.fieldView:openCups(true, self.field.balls):oncomplete(makeContinue())
     coroutine.yield()
 end
 
 function Operator:hideBalls()
-    self.fieldView:showBalls(false):oncomplete(makeContinue())
+    self.fieldView:openCups(false, self.field.balls):oncomplete(makeContinue())
+    coroutine.yield()
+end
+
+function Operator:openCup(id)
+    self.fieldView:openCups(true, {[id] = true}):oncomplete(makeContinue())
+    coroutine.yield()
+end
+
+function Operator:closeCup(id)
+    self.fieldView:openCups(false, {[id] = true}):oncomplete(makeContinue())
     coroutine.yield()
 end
 
