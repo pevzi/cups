@@ -19,29 +19,29 @@ local function initCups(columns, rows)
     return cups
 end
 
-local function initBalls(balls, cups)
-    assert(balls <= cups, "the ball number must not exceed the number of cups")
+local function initBalls(nballs, ncups)
+    assert(nballs <= ncups, "the number of balls must not exceed the number of cups")
 
     local result = {}
 
-    if balls == 1 then
-        result[math.random(cups)] = next(res.colors)
+    if nballs == 1 then
+        result[math.random(ncups)] = next(res.colors)
         return result
     end
 
     local numbers = {}
 
-    for i = 1, cups do
+    for i = 1, ncups do
         numbers[i] = i
     end
 
     local color
 
     -- essentially a Fisher–Yates shuffle
-    for i = 1, balls do
+    for i = 1, nballs do
         color = next(res.colors, color) or next(res.colors)
 
-        local j = math.random(i, cups)
+        local j = math.random(i, ncups)
         numbers[i], numbers[j] = numbers[j], numbers[i]
 
         result[numbers[i]] = color

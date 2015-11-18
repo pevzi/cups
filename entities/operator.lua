@@ -31,10 +31,10 @@ function Shuffle:enteredState()
 end
 
 local function resume(co)
-    local ok, err = coroutine.resume(co)
+    local ok, msg = coroutine.resume(co)
 
     if not ok then
-        error(err)
+        error(msg)
     end
 end
 
