@@ -4,7 +4,7 @@ local images = {
 }
 
 for k, v in pairs(images) do
-    images[k] = love.graphics.newImage("images/"..v)
+    images[k] = love.graphics.newImage("images/"..v, {mipmaps = true})
     images[k]:setMipmapFilter("linear", 1)
 end
 
