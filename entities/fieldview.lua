@@ -78,6 +78,9 @@ end
 local FieldView = class("FieldView")
 
 function FieldView:initialize(field, l,t,w,h)
+    self.columns = field.columns
+    self.rows = field.rows
+
     self.cupsBatch = love.graphics.newSpriteBatch(res.images.cup, field.columns * field.rows)
     self.ballsBatch = love.graphics.newSpriteBatch(res.images.ball)
 
@@ -94,10 +97,10 @@ function FieldView:initialize(field, l,t,w,h)
         end
     end
 
-    local width = xstep * (field.columns - 1) + cupWidth
-    local height = ystep * (field.rows - 1) + cupHeight
+    self.width = xstep * (field.columns - 1) + cupWidth
+    self.height = ystep * (field.rows - 1) + cupHeight
 
-    self.x, self.y, self.scale = fitRect(width, height, l,t,w,h)
+    self.x, self.y, self.scale = fitRect(self.width, self.height, l,t,w,h)
 
     self.tweens = flux.group()
 
@@ -161,6 +164,23 @@ function FieldView:openCups(open, cups, duration)
     end
 
     return lastTween
+end
+
+function FieldView:query(qx, qy)
+    qx = qx - self.x
+    qy = qy - self.y
+
+    local w = self.width * self.scale
+    local h = self.height * self.scale
+
+    if qx <= 0 or qx >= w or qy <= 0 or qy >= h then
+        return false
+    end
+
+    local c = math.ceil(qx / w * self.columns)
+    local r = math.ceil(qy / h * self.rows)
+
+    return true, c, r
 end
 
 function FieldView:update(dt)
