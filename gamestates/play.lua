@@ -1,6 +1,6 @@
 local Field = require "entities.field"
 local FieldView = require "entities.fieldview"
-local Operator = require "entities.operator"
+local Operator = require "operator"
 
 local Play = {}
 
@@ -18,7 +18,7 @@ function Play:newGame(params)
     self.field = Field(4, 2, 2)
     self.fieldView = FieldView(self.field, 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
 
-    self.operator = Operator(self.field, self.fieldView, 0.1, 0.4, 8, 2, 1)
+    self.operator = Operator(self.field, self.fieldView, 0.1, 0.4, 3, 2, 1)
 end
 
 function Play:update(dt)
