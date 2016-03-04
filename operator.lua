@@ -1,6 +1,8 @@
 local class = require "libs.middleclass"
 local Flow = require "libs.flow"
 
+local res = require "resources"
+
 local initialState = "Show"
 
 local Operator = class("Operator", Flow)
@@ -33,33 +35,53 @@ end
 
 local Query = Operator:addState("Query")
 
+function Query:enteredState()
+    self.requested = res.colors[math.random(self.field.nballs)]
+    self.hud:askColor(self.requested)
+end
+
 function Query:listen(dt)
     if love.mouse.isDown(1) then
-        local id = self:query(love.mouse.getPosition())
+        local id, ball = self:query(love.mouse.getPosition())
 
         if id then
-            self:runState("Result", id)
+            self:runState("Result", id, ball)
         end
     end
 end
 
 local Result = Operator:addState("Result")
 
-function Result:act(id)
+function Result:act(id, ball)
+    local correct = self.requested == ball
+
+    if correct then
+        self.hud:sayCorrect()
+    else
+        self.hud:sayIncorrect()
+    end
+
     self:openCup(id)
     self:sleep(0.5)
     self:closeCup(id)
 
-    self:runState("Show")
+    self.hud:hide()
+
+    if correct then
+        self:runState("Shuffle")
+    else
+        self:runState("Show")
+    end
 end
 
 ------------------------------------------
 
-function Operator:initialize(field, fieldView, swapDelay, swapDuration, rounds, simultaneous, ballDelay)
+function Operator:initialize(field, fieldView, hud, swapDelay, swapDuration, rounds, simultaneous, ballDelay)
     Operator.super.initialize(self)
 
     self.field = field
     self.fieldView = fieldView
+    self.hud = hud
     self.swapDelay = swapDelay
     self.swapDuration = swapDuration
     self.rounds = rounds
@@ -99,7 +121,7 @@ function Operator:query(qx, qy)
     local ok, c, r = self.fieldView:query(qx, qy)
 
     if ok then
-        return self.field.cups[r][c]
+        return self.field:get(c, r)
     end
 end
 

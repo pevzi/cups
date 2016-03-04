@@ -90,8 +90,8 @@ function FieldView:initialize(field, l,t,w,h)
         for c = 1, field.columns do
             local id = field.cups[r][c]
 
-            local ballColor = field:getBall(id)
-            local ball = ballColor and Ball(res.colors[ballColor], self.ballsBatch)
+            local ballColor = field.balls[id]
+            local ball = ballColor and Ball(ballColor, self.ballsBatch)
 
             self.cups[id] = Cup((c - 1) * xstep, (r - 1) * ystep, ball, self.cupsBatch)
         end
@@ -103,8 +103,6 @@ function FieldView:initialize(field, l,t,w,h)
     self.x, self.y, self.scale = fitRect(self.width, self.height, l,t,w,h)
 
     self.tweens = flux.group()
-
-    self.showingBalls = false
 end
 
 function FieldView:moveCups(toMove, duration)
@@ -188,6 +186,8 @@ function FieldView:update(dt)
 end
 
 function FieldView:draw()
+    love.graphics.setColor(255, 255, 255)
+
     love.graphics.push()
 
         love.graphics.translate(self.x, self.y)

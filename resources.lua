@@ -1,6 +1,9 @@
 local images = {
     cup = "cup.png",
-    ball = "ball.png"
+    ball = "ball.png",
+    question = "question.png",
+    correct = "correct.png",
+    incorrect = "incorrect.png"
 }
 
 for k, v in pairs(images) do
@@ -9,9 +12,9 @@ for k, v in pairs(images) do
 end
 
 local colors = {
-    red = {200, 152, 160},
-    green = {160, 200, 152},
-    blue = {152, 160, 200}
+    {200, 152, 160},
+    {160, 200, 152},
+    {152, 160, 200}
 }
 
 return {

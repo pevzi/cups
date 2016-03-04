@@ -22,32 +22,30 @@ end
 local function initBalls(nballs, ncups)
     assert(nballs <= ncups, "the number of balls must not exceed the number of cups")
 
-    local result = {}
+    local balls = {}
 
     if nballs == 1 then
-        result[math.random(ncups)] = next(res.colors)
-        return result
+        balls[math.random(ncups)] = res.colors[1]
+        return balls
     end
 
-    local numbers = {}
+    local ids = {}
 
     for i = 1, ncups do
-        numbers[i] = i
+        ids[i] = i
     end
-
-    local color
 
     -- essentially a Fisher–Yates shuffle
     for i = 1, nballs do
-        color = next(res.colors, color) or next(res.colors)
+        local color = res.colors[i]
 
         local j = math.random(i, ncups)
-        numbers[i], numbers[j] = numbers[j], numbers[i]
+        ids[i], ids[j] = ids[j], ids[i]
 
-        result[numbers[i]] = color
+        balls[ids[i]] = color
     end
 
-    return result
+    return balls
 end
 
 local function choosePair(columns, rows)
@@ -77,10 +75,10 @@ function Field:initialize(columns, rows, nballs)
     self.columns = columns or 3
     self.rows = rows or 1
 
-    nballs = nballs or 1
+    self.nballs = nballs or 1
 
     self.cups = initCups(self.columns, self.rows)
-    self.balls = initBalls(nballs, self.columns * self.rows)
+    self.balls = initBalls(self.nballs, self.columns * self.rows)
 end
 
 function Field:swap(n)
@@ -119,9 +117,9 @@ function Field:swap(n)
     return swapped
 end
 
-function Field:getBall(c, r)
-    local id = r and self.cups[r][c] or c
-    return self.balls[id], id
+function Field:get(c, r)
+    local id = self.cups[r][c]
+    return id, self.balls[id]
 end
 
 return Field
