@@ -9,13 +9,24 @@ setmetatable(_G, {
 })
 
 local Game = require "game"
+local res = require "resources"
 
 local game
 
 function love.load()
+    love.graphics.setFont(res.fonts.main)
+
     math.randomseed(os.time())
 
     game = Game()
+end
+
+function love.focus(f)
+    game:focus(f)
+end
+
+function love.keypressed(key)
+    game:keypressed(key)
 end
 
 function love.update(dt)
@@ -24,10 +35,4 @@ end
 
 function love.draw()
     game:draw()
-end
-
-function love.keypressed(key)
-    if key == "escape" then
-        love.event.quit()
-    end
 end

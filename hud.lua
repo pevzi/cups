@@ -48,13 +48,17 @@ function HUD:update(dt)
 end
 
 function HUD:draw()
-    love.graphics.translate(self.x, self.y)
+    love.graphics.push()
 
-    local query = self.query
+        love.graphics.translate(self.x, self.y)
 
-    love.graphics.setColor(query.color)
-    love.graphics.draw(res.images[query.icon], query.x, query.y, 0,
-        query.scale, query.scale, query.ox, query.oy)
+        local query = self.query
+
+        love.graphics.setColor(query.color)
+        love.graphics.draw(res.images[query.icon], query.x, query.y, 0,
+            query.scale, query.scale, query.ox, query.oy)
+
+    love.graphics.pop()
 end
 
 return HUD

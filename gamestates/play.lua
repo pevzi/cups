@@ -2,13 +2,14 @@ local Field = require "entities.field"
 local FieldView = require "entities.fieldview"
 local HUD = require "hud"
 local Operator = require "operator"
+local res = require "resources"
 
 local padding = love.graphics.getHeight() * 0.15
 
 local Play = {}
 
 function Play:enteredState(params)
-    love.graphics.setBackgroundColor(251, 247, 233)
+    love.graphics.setBackgroundColor(res.colors.background)
 
     if params then
         self:newGame(params)
@@ -23,7 +24,23 @@ function Play:newGame(params)
         love.graphics.getWidth() - padding * 2, love.graphics.getHeight() - padding * 2)
     self.hud = HUD(self, padding)
 
-    self.operator = Operator(self.field, self.fieldView, self.hud, 0.1, 0.3, 3, 2, 1)
+    self.operator = Operator(self.field, self.fieldView, self.hud, 0.1, 0.3, 3, 2, 0.8)
+end
+
+function Play:pauseGame()
+    self:pushState("Pause")
+end
+
+function Play:focus(f)
+    if not f then
+        self:pauseGame()
+    end
+end
+
+function Play:keypressed(key)
+    if key == "escape" then
+        self:pauseGame()
+    end
 end
 
 function Play:update(dt)
