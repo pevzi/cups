@@ -1,6 +1,6 @@
 local class = require "libs.middleclass"
-local Flow = require "libs.flow"
 
+local Flow = require "flow"
 local res = require "resources"
 
 local initialState = "Show"
