@@ -62,7 +62,7 @@ function Result:act(id, ball)
     end
 
     self:openCup(id)
-    self:sleep(0.5)
+    self:sleep(self.ballDelay)
     self:closeCup(id)
 
     self.hud:hide()

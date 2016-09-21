@@ -66,7 +66,7 @@ function Mover:add(cup, x, y)
     self.arcs[cup] = makeArc(cup.x, cup.y, x, y, self.angle)
 end
 
-function Mover:update()
+function Mover:updatePositions()
     for cup, arc in pairs(self.arcs) do
         cup:setPosition(arc(self.p))
     end
@@ -120,7 +120,7 @@ function FieldView:moveCups(toMove, duration, oncomplete)
     local tween = self.tweens:to(mover, duration, {p = 1}):ease(easing)
 
     tween:onupdate(function ()
-        mover:update()
+        mover:updatePositions()
     end)
 
     tween:oncomplete(oncomplete)
