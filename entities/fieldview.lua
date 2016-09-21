@@ -151,7 +151,7 @@ function FieldView:openCups(open, cups, duration)
             cup:updateSprite()
         end)
 
-        local delay = math.random() * duration * 0.4
+        local delay = love.math.random() * duration * 0.4
 
         tween:delay(delay)
 

@@ -16,8 +16,6 @@ local game
 function love.load()
     love.graphics.setFont(res.fonts.main)
 
-    math.randomseed(os.time())
-
     game = Game()
 end
 

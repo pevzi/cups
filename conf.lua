@@ -5,6 +5,5 @@ function love.conf(t)
     t.window.msaa = 4
 
     t.modules.joystick = false
-    t.modules.math = false
     t.modules.physics = false
 end

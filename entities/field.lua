@@ -25,7 +25,7 @@ local function initBalls(nballs, ncups)
     local balls = {}
 
     if nballs == 1 then
-        balls[math.random(ncups)] = res.colors[1]
+        balls[love.math.random(ncups)] = res.colors[1]
         return balls
     end
 
@@ -39,7 +39,7 @@ local function initBalls(nballs, ncups)
     for i = 1, nballs do
         local color = res.colors[i]
 
-        local j = math.random(i, ncups)
+        local j = love.math.random(i, ncups)
         ids[i], ids[j] = ids[j], ids[i]
 
         balls[ids[i]] = color
@@ -54,14 +54,14 @@ local function choosePair(columns, rows)
     local h = rows * (columns - 1) -- total number of horizontal pairs
     local v = columns * (rows - 1) -- total number of vertical pairs
 
-    if math.random(h + v) <= h then -- choose a horizontal pair
-        c1 = math.random(columns - 1)
-        r1 = math.random(rows)
+    if love.math.random(h + v) <= h then -- choose a horizontal pair
+        c1 = love.math.random(columns - 1)
+        r1 = love.math.random(rows)
         c2 = c1 + 1
         r2 = r1
     else -- choose a vertical pair
-        c1 = math.random(columns)
-        r1 = math.random(rows - 1)
+        c1 = love.math.random(columns)
+        r1 = love.math.random(rows - 1)
         c2 = c1
         r2 = r1 + 1
     end

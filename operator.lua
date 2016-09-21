@@ -36,7 +36,7 @@ end
 local Query = Operator:addState("Query")
 
 function Query:enteredState()
-    self.requested = res.colors[math.random(self.field.nballs)]
+    self.requested = res.colors[love.math.random(self.field.nballs)]
     self.hud:askColor(self.requested)
 end
 
