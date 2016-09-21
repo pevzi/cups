@@ -92,28 +92,28 @@ function Operator:initialize(field, fieldView, hud, swapDelay, swapDuration, rou
 end
 
 function Operator:showBalls()
-    self.fieldView:openCups(true, self.field.balls):oncomplete(function () self:resume() end)
+    self.fieldView:openCups(true, self.field.balls, function () self:resume() end)
     self:wait()
 end
 
 function Operator:hideBalls()
-    self.fieldView:openCups(false, self.field.balls):oncomplete(function () self:resume() end)
+    self.fieldView:openCups(false, self.field.balls, function () self:resume() end)
     self:wait()
 end
 
 function Operator:openCup(id)
-    self.fieldView:openCups(true, {[id] = true}):oncomplete(function () self:resume() end)
+    self.fieldView:openCups(true, {[id] = true}, function () self:resume() end)
     self:wait()
 end
 
 function Operator:closeCup(id)
-    self.fieldView:openCups(false, {[id] = true}):oncomplete(function () self:resume() end)
+    self.fieldView:openCups(false, {[id] = true}, function () self:resume() end)
     self:wait()
 end
 
 function Operator:swap()
     local moved = self.field:swap(self.simultaneous)
-    self.fieldView:moveCups(moved, self.swapDuration):oncomplete(function () self:resume() end)
+    self.fieldView:moveCups(moved, self.swapDuration, function () self:resume() end)
     self:wait()
 end
 

@@ -6,9 +6,6 @@ local Ball = require "entities.ball"
 local class = require "libs.middleclass"
 local flux = require "libs.flux"
 
-local ANGLE = math.pi * 0.8
-local EASING = "quadinout"
-
 local cupWidth = res.images.cup:getWidth()
 local cupHeight = res.images.cup:getHeight()
 
@@ -105,8 +102,11 @@ function FieldView:initialize(field, l,t,w,h)
     self.tweens = flux.group()
 end
 
-function FieldView:moveCups(toMove, duration)
-    local mover = Mover(ANGLE)
+function FieldView:moveCups(toMove, duration, oncomplete)
+    local angle = math.pi * 0.8
+    local easing = "quadinout"
+
+    local mover = Mover(angle)
 
     for id, position in pairs(toMove) do
         local cup = self.cups[id]
@@ -117,17 +117,17 @@ function FieldView:moveCups(toMove, duration)
         mover:add(cup, x, y)
     end
 
-    local tween = self.tweens:to(mover, duration, {p = 1}):ease(EASING)
+    local tween = self.tweens:to(mover, duration, {p = 1}):ease(easing)
 
     tween:onupdate(function ()
         mover:update()
     end)
 
-    return tween
+    tween:oncomplete(oncomplete)
 end
 
-function FieldView:openCups(open, cups, duration)
-    duration = duration or 0.5
+function FieldView:openCups(open, cups, oncomplete)
+    local duration = 0.5
 
     local easing, yoffset
 
@@ -161,7 +161,7 @@ function FieldView:openCups(open, cups, duration)
         end
     end
 
-    return lastTween
+    lastTween:oncomplete(oncomplete)
 end
 
 function FieldView:query(qx, qy)
