@@ -1,59 +1,44 @@
 local class = require "libs.middleclass"
 
-local Flow = require "flow"
 local res = require "resources"
 
-local initialState = "Show"
+local function timer(t)
+    return function (dt)
+        t = t - dt
+        return t <= 0
+    end
+end
 
-local Operator = class("Operator", Flow)
+local function mouseDown(button)
+    return function ()
+        return love.mouse.isDown(button)
+    end
+end
 
 ------------------------------------------
 
-local Show = Operator:addState("Show")
+local Operator = class("Operator")
 
-function Show:act()
+function Operator:act()
+    ::show::
+
     self:showBalls()
     self:sleep(self.ballDelay)
     self:hideBalls()
 
-    self:runState("Shuffle")
-end
-
-local Shuffle = Operator:addState("Shuffle")
-
-function Shuffle:act()
-    -- NOTE: this code doesn't take into consideration the tween/timer lateness
-    --       (so the error accumulates with every iteration)
+    ::shuffle::
 
     for i = 1, self.rounds do
         self:swap()
         self:sleep(self.swapDelay)
     end
 
-    self:runState("Query")
-end
+    local requested = res.colors[love.math.random(self.field.nballs)]
 
-local Query = Operator:addState("Query")
+    self.hud:askColor(requested)
 
-function Query:enteredState()
-    self.requested = res.colors[love.math.random(self.field.nballs)]
-    self.hud:askColor(self.requested)
-end
-
-function Query:listen(dt)
-    if love.mouse.isDown(1) then
-        local id, ball = self:query(love.mouse.getPosition())
-
-        if id then
-            self:runState("Result", id, ball)
-        end
-    end
-end
-
-local Result = Operator:addState("Result")
-
-function Result:act(id, ball)
-    local correct = self.requested == ball
+    local id, ball = self:queryPlayer()
+    local correct = ball == requested
 
     if correct then
         self.hud:sayCorrect()
@@ -68,17 +53,15 @@ function Result:act(id, ball)
     self.hud:hide()
 
     if correct then
-        self:runState("Shuffle")
+        goto shuffle
     else
-        self:runState("Show")
+        goto show
     end
 end
 
 ------------------------------------------
 
 function Operator:initialize(field, fieldView, hud, swapDelay, swapDuration, rounds, simultaneous, ballDelay)
-    Operator.super.initialize(self)
-
     self.field = field
     self.fieldView = fieldView
     self.hud = hud
@@ -88,7 +71,34 @@ function Operator:initialize(field, fieldView, hud, swapDelay, swapDuration, rou
     self.simultaneous = simultaneous
     self.ballDelay = ballDelay
 
-    self:runState(initialState)
+    self.co = coroutine.create(self.act)
+    self:resume(self)
+end
+
+function Operator:resume(...)
+    local ok, msg = coroutine.resume(self.co, ...)
+
+    if not ok then
+        error(msg)
+    end
+end
+
+function Operator:wait(worker)
+    self.worker = worker
+    coroutine.yield()
+end
+
+function Operator:update(dt)
+    if self.worker and self.worker(dt) then
+        self.worker = nil
+        self:resume()
+    end
+end
+
+------------------------------------------
+
+function Operator:sleep(duration)
+    self:wait(timer(duration))
 end
 
 function Operator:showBalls()
@@ -117,11 +127,15 @@ function Operator:swap()
     self:wait()
 end
 
-function Operator:query(qx, qy)
-    local ok, c, r = self.fieldView:query(qx, qy)
+function Operator:queryPlayer()
+    while true do
+        self:wait(mouseDown(1))
 
-    if ok then
-        return self.field:get(c, r)
+        local ok, c, r = self.fieldView:query(love.mouse.getPosition())
+
+        if ok then
+            return self.field:get(c, r)
+        end
     end
 end
 
